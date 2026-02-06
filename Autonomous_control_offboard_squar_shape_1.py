@@ -12,9 +12,7 @@ import sys
 import asyncio
 
 
-# ============================================================================
 # MISSION PLANNER - GENERATES 50Hz CONTROL SEQUENCES
-# ============================================================================
 
 class MissionPlanner:
     """
@@ -106,9 +104,7 @@ class MissionPlanner:
         return mission
 
 
-# ============================================================================
 # MAIN FLIGHT CONTROL WITH PRE-PLANNED MISSION
-# ============================================================================
 
 async def execute_planned_mission(connection_string, target_height=1.2):
     """
@@ -172,17 +168,13 @@ async def execute_planned_mission(connection_string, target_height=1.2):
     print("\nStabilizing for 3 seconds...")
     await asyncio.sleep(3.0)
     
-    # ========================================================================
     # GENERATE MISSION PLAN
-    # ========================================================================
     print("\n[7/7] Generating mission plan...")
     
     planner = MissionPlanner()
     mission_plan = planner.generate_mission()
     
-    # ========================================================================
     # START OFFBOARD MODE
-    # ========================================================================
     print("\nStarting OFFBOARD mode...")
     
     # Set initial setpoint - HOLD POSITION
@@ -213,9 +205,7 @@ async def execute_planned_mission(connection_string, target_height=1.2):
     print("EXECUTING MISSION - PRECISE TIMING")
     print("=" * 70)
     
-    # ========================================================================
     # EXECUTE MISSION AT 50Hz WITH PRECISE TIMING
-    # ========================================================================
     
     mission_start_time = time.time()
     last_phase = None
@@ -361,9 +351,7 @@ async def mission_loop(connection_string, target_height):
             await asyncio.sleep(5) 
             break
     
-    # ========================================================================
     # LANDING SEQUENCE (if not RTL)
-    # ========================================================================
     
     if choice != '2':
         print("\n" + "=" * 70)
@@ -399,9 +387,7 @@ async def mission_loop(connection_string, target_height):
     print("=" * 70)
 
 
-# ============================================================================
 # COM PORT DETECTION
-# ============================================================================
 
 def detect_com_ports():
     try:
@@ -510,3 +496,4 @@ if __name__ == "__main__":
         traceback.print_exc()
 
         sys.exit(1)
+
