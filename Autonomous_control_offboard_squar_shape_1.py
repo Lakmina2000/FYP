@@ -133,20 +133,20 @@ async def execute_planned_mission(connection_string, target_height=1.2):
     print("[2/7] Waiting for drone to connect...")
     async for state in drone.core.connection_state():
         if state.is_connected:
-            print("✓ Drone connected!")
+            print(" Drone connected!")
             break
     
     # Wait for position estimate
     print("[3/7] Waiting for position estimate...")
     async for health in drone.telemetry.health():
         if health.is_global_position_ok and health.is_home_position_ok:
-            print("✓ Position estimation ready")
+            print(" Position estimation ready")
             break
     
     # Arm the drone
     print("\n[4/7] Arming...")
     await drone.action.arm()
-    print("✓ Armed")
+    print(" Armed")
     
     # Set takeoff altitude
     print(f"[5/7] Setting takeoff altitude to {target_height}m...")
@@ -163,7 +163,7 @@ async def execute_planned_mission(connection_string, target_height=1.2):
         print(f"   Altitude: {altitude:.2f}m / {target_height}m", end='\r')
         
         if altitude >= target_height * 0.95:
-            print(f"\n✓ Reached target altitude: {altitude:.2f}m")
+            print(f"\n Reached target altitude: {altitude:.2f}m")
             break
         
         await asyncio.sleep(0.1)
@@ -192,9 +192,9 @@ async def execute_planned_mission(connection_string, target_height=1.2):
     
     try:
         await drone.offboard.start()
-        print("✓ Offboard mode ACTIVE")
+        print(" Offboard mode ACTIVE")
     except OffboardError as e:
-        print(f"✗ Failed to start offboard mode: {e}")
+        print(f" Failed to start offboard mode: {e}")
         print("  Make sure PX4 parameters are set:")
         print("  - COM_RCL_EXCEPT = 4")
         print("  - COM_OF_LOSS_T = 1.0")
@@ -268,20 +268,20 @@ async def execute_planned_mission(connection_string, target_height=1.2):
             # If we're running behind, skip the sleep but continue
     
     except KeyboardInterrupt:
-        print("\n\n⚠ Mission interrupted by user")
+        print("\n\n Mission interrupted by user")
         await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
         await asyncio.sleep(0.5)
         await drone.action.return_to_launch()
         return False
     except Exception as e:
-        print(f"\n\n✗ Error during mission: {e}")
+        print(f"\n\n Error during mission: {e}")
         await drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
         await asyncio.sleep(0.5)
         await drone.action.return_to_launch()
         return False
     
     mission_duration = time.time() - mission_start_time
-    print(f"\n\n✓ Mission completed in {mission_duration:.2f} seconds")
+    print(f"\n\n Mission completed in {mission_duration:.2f} seconds")
     
     # Return to hover - CRITICAL for stopping drift
     print("\nReturning to hover position (stopping all movement)...")
@@ -320,7 +320,7 @@ async def mission_loop(connection_string, target_height):
         success = await execute_planned_mission(connection_string, target_height)
         
         if not success:
-            print("\n⚠ Mission failed or interrupted")
+            print("\n Mission failed or interrupted")
             break
         
         # Ask user what to do next
@@ -335,16 +335,16 @@ async def mission_loop(connection_string, target_height):
         choice = input("\nSelect (1-3) [3]: ").strip() or "3"
         
         if choice == '1':
-            print("\n🔄 Repeating mission...")
+            print("\n Repeating mission...")
             continue
         elif choice == '2':
-            print("\n✓ Returning to launch...")
+            print("\n Returning to launch...")
             # Stop offboard mode
             try:
                 await drone.offboard.stop()
-                print("✓ Offboard stopped")
+                print(" Offboard stopped")
             except Exception as e:
-                print(f"⚠ Error stopping offboard: {e}")
+                print(f" Error stopping offboard: {e}")
             
             # RTL
             print("Executing Return to Launch...")
@@ -355,7 +355,7 @@ async def mission_loop(connection_string, target_height):
             await asyncio.sleep(5)  # Wait for RTL to complete
             break
         else:
-            print("\n✓ Landing at current position...")
+            print("\n Landing at current position...")
             await drone.action.land()
             
             await asyncio.sleep(5) 
@@ -374,9 +374,9 @@ async def mission_loop(connection_string, target_height):
         print("\n[Landing] Stopping offboard mode...")
         try:
             await drone.offboard.stop()
-            print("✓ Offboard stopped")
+            print(" Offboard stopped")
         except Exception as e:
-            print(f"⚠ Error stopping offboard: {e}")
+            print(f" Error stopping offboard: {e}")
         
         # Land
         print("[Landing] Initiating landing...")
@@ -389,7 +389,7 @@ async def mission_loop(connection_string, target_height):
             print(f"   Altitude: {altitude:.2f}m", end='\r')
             
             if altitude < 0.1:
-                print("\n✓ Landed successfully")
+                print("\n Landed successfully")
                 break
             
             await asyncio.sleep(0.5)
@@ -440,7 +440,7 @@ def get_connection_string():
             com_port = input("\nEnter COM port (e.g., COM3): ").strip()
             com_port = com_port.upper() if com_port.upper().startswith("COM") else f"COM{com_port}"
         
-        print(f"\n✓ Using: {com_port}")
+        print(f"\n Using: {com_port}")
         return f"serial:///{com_port}:57600"
         
     elif conn_type == "2":
@@ -455,22 +455,19 @@ def get_connection_string():
     return "serial:///COM14:57600"
 
 
-# ============================================================================
 # MAIN
-# ============================================================================
-
 if __name__ == "__main__":
     print("\n" + "=" * 70)
     print("PX4 PRE-PLANNED MISSION CONTROL - FIXED VERSION")
     print("Square Pattern Flight - 50Hz Control Rate")
     print("=" * 70)
     
-    print("\n📦 DEPENDENCIES:")
+    print("\n DEPENDENCIES:")
     print("   pip install mavsdk")
-    print("\n⚠ PX4 PARAMETERS:")
+    print("\n PX4 PARAMETERS:")
     print("   - COM_RCL_EXCEPT = 4")
     print("   - COM_OF_LOSS_T = 1.0")
-    print("\n🎯 MISSION PROFILE:")
+    print("\n MISSION PROFILE:")
     print("   1. Forward  - 2 seconds")
     print("   2. Right    - 2 seconds")
     print("   3. Backward - 2 seconds")
@@ -480,7 +477,7 @@ if __name__ == "__main__":
     
     proceed = input("\nReady to proceed? (y/n) [y]: ").strip().lower() or 'y'
     if proceed != 'y':
-        print("\n⚠ Setup cancelled")
+        print("\n Setup cancelled")
         sys.exit(0)
     
     # Get target height
@@ -489,11 +486,11 @@ if __name__ == "__main__":
             height_input = input("\nTakeoff height (0.5-10.0) [1.2]: ").strip()
             target_height = 1.2 if height_input == "" else float(height_input)
             if 0.5 <= target_height <= 10.0:
-                print(f"✓ Takeoff height: {target_height}m")
+                print(f" Takeoff height: {target_height}m")
                 break
             print("⚠ Must be 0.5-10.0m")
         except ValueError:
-            print("⚠ Invalid number")
+            print(" Invalid number")
     
     # Get connection
     connection_string = get_connection_string()
@@ -505,10 +502,11 @@ if __name__ == "__main__":
     try:
         asyncio.run(mission_loop(connection_string, target_height))
     except KeyboardInterrupt:
-        print("\n\n⚠ Interrupted by user")
+        print("\n\n Interrupted by user")
         sys.exit(0)
     except Exception as e:
-        print(f"\n✗ ERROR: {e}")
+        print(f"\n ERROR: {e}")
         import traceback
         traceback.print_exc()
+
         sys.exit(1)
